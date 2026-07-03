@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { nextSrs, todayStr, dayDiff } from '../lib/helpers.js';
-
-const STORAGE_KEY = 'deutsch-trainer-v1';
+import { loadStats, saveStats } from '../lib/storage.js';
 
 export const DEFAULT_STATS = {
   answered: 0,
@@ -14,23 +13,13 @@ export const DEFAULT_STATS = {
 };
 
 // Persistent progress: overall + per-skill accuracy, streak and spaced-repetition
-// state, all mirrored to localStorage.
+// state, all mirrored to localStorage through the versioned storage layer
+// (schema migrations, corrupt-data quarantine — see lib/storage.js).
 export function useStats() {
-  const [stats, setStats] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? { ...DEFAULT_STATS, ...JSON.parse(raw) } : DEFAULT_STATS;
-    } catch {
-      return DEFAULT_STATS;
-    }
-  });
+  const [stats, setStats] = useState(() => loadStats(DEFAULT_STATS));
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-    } catch {
-      /* ignore write errors (e.g. private mode) */
-    }
+    saveStats(stats);
   }, [stats]);
 
   // All updaters are useCallback([]) — they only touch setStats (stable), so
