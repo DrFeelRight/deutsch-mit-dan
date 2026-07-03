@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react';
 import Card from '../components/ui/Card.jsx';
 import Pill from '../components/ui/Pill.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
 import { CATEGORIES } from '../data/categories.js';
-import { FLASHCARDS } from '../data/flashcards.js';
 import { dayDiff, todayStr } from '../lib/helpers.js';
 
 function StatBox({ label, value, accent }) {
@@ -16,10 +16,25 @@ function StatBox({ label, value, accent }) {
 
 export default function Dashboard({ stats, onSelect, onReset }) {
   const accuracy = stats.answered ? Math.round((stats.correct / stats.answered) * 100) : 0;
-  const dueCount = FLASHCARDS.filter((c) => {
-    const e = stats.srs[c.id];
-    return !e || dayDiff(e.due, todayStr()) >= 0;
-  }).length;
+
+  // The flashcard bank is a lazy chunk (see lib/queue.js), so the due count
+  // is computed after mount instead of shipping the data in the main bundle.
+  const [dueCount, setDueCount] = useState(null);
+  useEffect(() => {
+    let active = true;
+    import('../data/flashcards.js').then(({ FLASHCARDS }) => {
+      if (!active) return;
+      setDueCount(
+        FLASHCARDS.filter((c) => {
+          const e = stats.srs[c.id];
+          return !e || dayDiff(e.due, todayStr()) >= 0;
+        }).length
+      );
+    });
+    return () => {
+      active = false;
+    };
+  }, [stats.srs]);
 
   return (
     <div className="space-y-6">
@@ -33,7 +48,7 @@ export default function Dashboard({ stats, onSelect, onReset }) {
           <StatBox label="Answered" value={stats.answered} accent="text-slate-800" />
           <StatBox label="Accuracy" value={`${accuracy}%`} accent="text-emerald-600" />
           <StatBox label="Sessions" value={stats.sessions} accent="text-brand-600" />
-          <StatBox label="Cards due" value={dueCount} accent="text-orange-500" />
+          <StatBox label="Cards due" value={dueCount === null ? '…' : dueCount} accent="text-orange-500" />
         </div>
         {stats.answered > 0 && (
           <div className="mt-5">

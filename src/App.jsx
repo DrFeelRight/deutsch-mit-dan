@@ -1,26 +1,38 @@
-import { useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import Header from './components/Header.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import ExerciseSession from './pages/ExerciseSession.jsx';
+import Card from './components/ui/Card.jsx';
 import { useStats } from './hooks/useStats.js';
+
+// Code-split at the session-routing boundary: the exercise engine (session
+// page + all exercise components) loads only when a session starts. The
+// dashboard stays in the main bundle since it's the landing view.
+const ExerciseSession = lazy(() => import('./pages/ExerciseSession.jsx'));
+
+const SessionFallback = () => (
+  <Card className="p-8 text-center">
+    <div className="animate-pulse text-slate-400 text-sm">Loading exercises…</div>
+  </Card>
+);
 
 export default function App() {
   const { stats, recordAnswer, rateCard, finishSession, reset } = useStats();
   // view: { screen: 'dashboard' } | { screen: 'exercise', key, title }
   const [view, setView] = useState({ screen: 'dashboard' });
 
-  const goExercise = (key, title) => {
+  const goExercise = useCallback((key, title) => {
     window.scrollTo(0, 0);
     setView({ screen: 'exercise', key, title });
-  };
-  const goHome = () => {
+  }, []);
+
+  const goHome = useCallback(() => {
     window.scrollTo(0, 0);
     setView({ screen: 'dashboard' });
-  };
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     if (window.confirm('Reset all progress, streak and spaced-repetition data?')) reset();
-  };
+  }, [reset]);
 
   return (
     <div className="min-h-screen font-sans text-slate-900">
@@ -30,16 +42,18 @@ export default function App() {
         {view.screen === 'dashboard' ? (
           <Dashboard stats={stats} onSelect={goExercise} onReset={handleReset} />
         ) : (
-          <ExerciseSession
-            key={view.key}
-            categoryKey={view.key}
-            title={view.title}
-            srs={stats.srs}
-            onRecord={recordAnswer}
-            onRate={rateCard}
-            onDone={finishSession}
-            onExit={goHome}
-          />
+          <Suspense fallback={<SessionFallback />}>
+            <ExerciseSession
+              key={view.key}
+              categoryKey={view.key}
+              title={view.title}
+              srs={stats.srs}
+              onRecord={recordAnswer}
+              onRate={rateCard}
+              onDone={finishSession}
+              onExit={goHome}
+            />
+          </Suspense>
         )}
       </main>
 

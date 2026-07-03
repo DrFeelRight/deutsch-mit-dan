@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Card from '../components/ui/Card.jsx';
 import Pill from '../components/ui/Pill.jsx';
 import LevelPill from '../components/ui/LevelPill.jsx';
@@ -14,11 +14,32 @@ import { SKILL_LABEL } from '../data/categories.js';
 // Presents one task at a time from a queue, records each result, and shows a
 // summary screen at the end.
 export default function ExerciseSession({ categoryKey, title, srs, onRecord, onRate, onExit, onDone }) {
-  // Build the queue once per session (snapshot of SRS at start).
-  const queue = useMemo(() => buildQueue(categoryKey, srs), [categoryKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Snapshot SRS at mount so mid-session ratings don't rebuild the queue.
+  const srsSnapshot = useRef(srs).current;
+  // Queue resolves asynchronously: the content chunk for this category is
+  // fetched on demand (see lib/queue.js).
+  const [queue, setQueue] = useState(null);
   const [index, setIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    buildQueue(categoryKey, srsSnapshot).then((q) => {
+      if (active) setQueue(q);
+    });
+    return () => {
+      active = false;
+    };
+  }, [categoryKey, srsSnapshot]);
+
+  if (queue === null) {
+    return (
+      <Card className="p-8 text-center">
+        <div className="animate-pulse text-slate-400 text-sm">Loading exercises…</div>
+      </Card>
+    );
+  }
 
   const item = queue[index];
 

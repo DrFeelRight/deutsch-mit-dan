@@ -1,6 +1,9 @@
+import { memo } from 'react';
 import Pill from './ui/Pill.jsx';
 
-export default function Header({ streak, onHome }) {
+// Memoised: App's stats change on every answered item, but the header only
+// depends on the streak — skip re-rendering it for unrelated stat updates.
+function Header({ streak, onHome }) {
   return (
     <header className="sticky top-0 z-10 backdrop-blur bg-white/80 border-b border-slate-100">
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -27,3 +30,5 @@ export default function Header({ streak, onHome }) {
     </header>
   );
 }
+
+export default memo(Header);

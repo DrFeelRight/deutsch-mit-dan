@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { nextSrs, todayStr, dayDiff } from '../lib/helpers.js';
 
 const STORAGE_KEY = 'deutsch-trainer-v1';
@@ -33,7 +33,9 @@ export function useStats() {
     }
   }, [stats]);
 
-  const recordAnswer = (skill, correct) => {
+  // All updaters are useCallback([]) — they only touch setStats (stable), so
+  // consumers can hold them in deps/memo without churn.
+  const recordAnswer = useCallback((skill, correct) => {
     setStats((s) => {
       const prev = s.bySkill[skill] || { answered: 0, correct: 0 };
       return {
@@ -46,13 +48,13 @@ export function useStats() {
         },
       };
     });
-  };
+  }, []);
 
-  const rateCard = (cardId, rating) => {
+  const rateCard = useCallback((cardId, rating) => {
     setStats((s) => ({ ...s, srs: { ...s.srs, [cardId]: nextSrs(s.srs[cardId], rating) } }));
-  };
+  }, []);
 
-  const finishSession = () => {
+  const finishSession = useCallback(() => {
     setStats((s) => {
       const today = todayStr();
       let streak = s.streak;
@@ -65,9 +67,9 @@ export function useStats() {
       }
       return { ...s, sessions: s.sessions + 1, streak, lastActive: today };
     });
-  };
+  }, []);
 
-  const reset = () => setStats(DEFAULT_STATS);
+  const reset = useCallback(() => setStats(DEFAULT_STATS), []);
 
   return { stats, recordAnswer, rateCard, finishSession, reset };
 }
