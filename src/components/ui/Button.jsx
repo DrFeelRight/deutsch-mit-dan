@@ -1,9 +1,15 @@
+// Token-driven buttons. Primary is the accent fill (on-accent label flips
+// white↔near-black by theme so it always clears AA). Secondary is quiet.
+//
+// success/danger are kept as named variants for existing callers, but recoloured
+// to be colourblind-safe: success = teal (never green-vs-red), danger = amber
+// outline (never red). Meaning is always carried by label/icon too, not hue.
 const VARIANTS = {
-  primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm',
-  ghost: 'bg-slate-100 hover:bg-slate-200 text-slate-700',
-  outline: 'border border-slate-300 hover:border-brand-400 hover:text-brand-600 text-slate-700 bg-white',
-  success: 'bg-emerald-500 hover:bg-emerald-600 text-white',
-  danger: 'bg-rose-500 hover:bg-rose-600 text-white',
+  primary: 'bg-accent-strong hover:bg-accent-hover text-on-accent',
+  secondary: 'bg-transparent border border-line text-ink hover:bg-ink/5',
+  ghost: 'bg-ink/5 hover:bg-ink/10 text-ink',
+  success: 'bg-accent-strong hover:bg-accent-hover text-on-accent',
+  danger: 'bg-transparent border border-warning text-warning-strong hover:bg-warning/10',
 };
 
 export default function Button({
@@ -19,7 +25,7 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${VARIANTS[variant]} ${className}`}
     >
       {children}
     </button>
