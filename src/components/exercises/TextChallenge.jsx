@@ -29,7 +29,7 @@ export default function TextChallenge({ item, onResult, header, promptNode, sub,
           if (e.key === 'Enter') submit();
         }}
         placeholder={placeholder || 'Type your answer…'}
-        className="mt-4 w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none text-slate-800 disabled:bg-slate-50"
+        className="mt-4 w-full px-4 py-3 rounded-xl border border-line bg-surface-2 text-ink placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 outline-none transition-colors disabled:opacity-70"
       />
 
       {!submitted && (

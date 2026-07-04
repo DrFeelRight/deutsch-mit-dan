@@ -11,6 +11,7 @@ import Conversation from '../components/exercises/Conversation.jsx';
 import { buildQueue } from '../lib/queue.js';
 import { weakCategories } from '../lib/errors.js';
 import { SKILL_LABEL } from '../data/categories.js';
+import { ArrowLeftIcon } from '../components/ui/Icon.jsx';
 
 // Presents one task at a time from a queue, records each result, and shows a
 // summary screen at the end.
@@ -40,7 +41,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
   if (queue === null) {
     return (
       <Card className="p-8 text-center">
-        <div className="animate-pulse text-slate-400 text-sm">Loading exercises…</div>
+        <div className="animate-pulse text-muted text-sm">Loading exercises…</div>
       </Card>
     );
   }
@@ -67,7 +68,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
   if (!queue.length) {
     return (
       <Card className="p-8 text-center">
-        <p className="text-slate-600">No items available right now.</p>
+        <p className="text-muted">No items available right now.</p>
         <div className="mt-4">
           <Button onClick={onExit}>Back to dashboard</Button>
         </div>
@@ -79,23 +80,22 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
     const pct = Math.round((correctCount / queue.length) * 100);
     return (
       <Card className="p-8 text-center pop">
-        <div className="text-5xl mb-3">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
-        <h2 className="text-2xl font-bold text-slate-800">Session complete!</h2>
-        <p className="mt-2 text-slate-500">{title}</p>
-        <div className="mt-6 inline-flex items-center gap-6 rounded-2xl bg-slate-50 px-8 py-5">
+        <h2 className="font-serif font-bold text-ink text-h1">Session complete</h2>
+        <p className="mt-2 text-muted">{title}</p>
+        <div className="mt-6 inline-flex items-center gap-8 rounded-2xl bg-surface-2 border border-line px-8 py-5">
           <div>
-            <div className="text-3xl font-extrabold text-brand-600">
+            <div className="text-3xl font-serif font-bold text-ink">
               {correctCount}/{queue.length}
             </div>
-            <div className="text-xs text-slate-500 mt-1">Correct</div>
+            <div className="text-xs text-muted mt-1">Correct</div>
           </div>
-          <div className="w-px h-10 bg-slate-200" />
+          <div className="w-px h-10 bg-line" />
           <div>
-            <div className="text-3xl font-extrabold text-emerald-600">{pct}%</div>
-            <div className="text-xs text-slate-500 mt-1">Accuracy</div>
+            <div className="text-3xl font-serif font-bold text-accent-strong">{pct}%</div>
+            <div className="text-xs text-muted mt-1">Accuracy</div>
           </div>
         </div>
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-muted">
           {pct >= 80
             ? 'Ausgezeichnet! Ready to level up.'
             : pct >= 50
@@ -103,7 +103,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             : 'Review the explanations and try again.'}
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Button variant="ghost" onClick={onExit}>
+          <Button variant="secondary" onClick={onExit}>
             Dashboard
           </Button>
           <Button onClick={restart}>Practice again</Button>
@@ -114,7 +114,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
 
   const header = (
     <div className="flex items-center justify-between mb-1">
-      <Pill className="bg-slate-100 text-slate-600">{SKILL_LABEL[item.kind]}</Pill>
+      <Pill className="bg-ink/5 text-muted">{SKILL_LABEL[item.kind]}</Pill>
       <LevelPill level={item.level} />
     </div>
   );
@@ -131,12 +131,12 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             onResult={handleResult}
             header={header}
             promptNode={
-              <p className="mt-4 text-xl font-semibold text-slate-800 leading-relaxed">
+              <p className="mt-4 font-serif text-2xl font-semibold text-ink leading-relaxed">
                 {item.prompt.replace('___', '_____')}
               </p>
             }
             sub={
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-muted">
                 {item.translation} · <span className="italic">hint: {item.hint}</span>
               </p>
             }
@@ -151,12 +151,12 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             onResult={handleResult}
             header={header}
             promptNode={
-              <p className="mt-4 text-slate-500 text-sm">
+              <p className="mt-4 text-muted text-sm">
                 Find and fix the mistake. Rewrite the sentence correctly:
               </p>
             }
             sub={
-              <p className="mt-2 text-xl font-semibold text-rose-600 line-through decoration-rose-300">
+              <p className="mt-2 font-serif text-2xl font-semibold text-warning-strong line-through decoration-warning/50">
                 {item.wrong}
               </p>
             }
@@ -170,8 +170,8 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             item={item}
             onResult={handleResult}
             header={header}
-            promptNode={<p className="mt-4 text-sm text-slate-400 uppercase tracking-wide">Translate to German</p>}
-            sub={<p className="mt-1 text-xl font-semibold text-slate-800">{item.source}</p>}
+            promptNode={<p className="mt-4 text-xs text-muted uppercase tracking-wide">Translate to German</p>}
+            sub={<p className="mt-1 font-serif text-2xl font-semibold text-ink">{item.source}</p>}
             placeholder="Auf Deutsch schreiben…"
           />
         );
@@ -182,8 +182,8 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             item={item}
             onResult={handleResult}
             header={header}
-            promptNode={<p className="mt-4 text-sm text-slate-400 uppercase tracking-wide">Translate to English</p>}
-            sub={<p className="mt-1 text-xl font-semibold text-slate-800">{item.source}</p>}
+            promptNode={<p className="mt-4 text-xs text-muted uppercase tracking-wide">Translate to English</p>}
+            sub={<p className="mt-1 font-serif text-2xl font-semibold text-ink">{item.source}</p>}
             placeholder="Write in English…"
           />
         );
@@ -195,7 +195,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             onResult={handleResult}
             header={header}
             sub={
-              <div className="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4 text-lg font-semibold text-slate-800">
+              <div className="mt-4 rounded-xl bg-surface-2 border border-line p-4 font-serif text-lg font-semibold text-ink">
                 {item.sentence}
               </div>
             }
@@ -209,7 +209,7 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
             onResult={handleResult}
             header={header}
             sub={
-              <div className="mt-4 rounded-xl bg-amber-50 border border-amber-100 p-4 text-slate-700 leading-relaxed">
+              <div className="mt-4 rounded-xl bg-surface-2 border border-line p-4 text-ink leading-relaxed">
                 {item.passage}
               </div>
             }
@@ -226,13 +226,17 @@ export default function ExerciseSession({ categoryKey, title, srs, errorCats, on
     <div>
       {/* Top bar: exit + progress */}
       <div className="flex items-center gap-4 mb-4">
-        <button onClick={onExit} className="text-slate-400 hover:text-slate-700 font-semibold text-sm">
-          ← Exit
+        <button
+          onClick={onExit}
+          className="flex items-center gap-1 text-muted hover:text-ink font-semibold text-sm rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <ArrowLeftIcon size={16} />
+          Exit
         </button>
         <div className="flex-1">
           <ProgressBar value={index} total={queue.length} />
         </div>
-        <span className="text-sm font-semibold text-slate-500 tabular-nums">
+        <span className="text-sm font-semibold text-muted tabular-nums">
           {index + 1}/{queue.length}
         </span>
       </div>

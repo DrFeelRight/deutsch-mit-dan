@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Card from '../components/ui/Card.jsx';
 import Pill from '../components/ui/Pill.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
+import { CATEGORY_ICONS, FlameIcon, TargetIcon, ShuffleIcon, ArrowRightIcon, SparkleIcon } from '../components/ui/Icon.jsx';
 import { CATEGORIES } from '../data/categories.js';
 import { dayDiff, todayStr } from '../lib/helpers.js';
 import { weakCategories } from '../lib/errors.js';
@@ -10,8 +11,8 @@ import { isAiEnabled, setAiEnabled, aiRequestsRemaining, AI_DAILY_CAP } from '..
 function StatBox({ label, value, accent }) {
   return (
     <div className="flex-1 text-center">
-      <div className={`text-2xl sm:text-3xl font-extrabold ${accent}`}>{value}</div>
-      <div className="text-xs text-slate-500 mt-1">{label}</div>
+      <div className={`text-h1 font-serif font-bold ${accent ? 'text-accent-strong' : 'text-ink'}`}>{value}</div>
+      <div className="text-xs text-muted mt-1">{label}</div>
     </div>
   );
 }
@@ -50,18 +51,21 @@ export default function Dashboard({ stats, onSelect, onReset }) {
       {/* Progress overview */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-slate-800 text-lg">Your progress</h2>
-          <Pill className="bg-orange-50 text-orange-600">🔥 {stats.streak} day streak</Pill>
+          <h2 className="font-serif font-bold text-ink text-h2">Your progress</h2>
+          <Pill className="bg-accent/10 text-accent-strong">
+            <FlameIcon size={14} strokeWidth={2} />
+            {stats.streak} day streak
+          </Pill>
         </div>
-        <div className="flex items-stretch divide-x divide-slate-100">
-          <StatBox label="Answered" value={stats.answered} accent="text-slate-800" />
-          <StatBox label="Accuracy" value={`${accuracy}%`} accent="text-emerald-600" />
-          <StatBox label="Sessions" value={stats.sessions} accent="text-brand-600" />
-          <StatBox label="Cards due" value={dueCount === null ? '…' : dueCount} accent="text-orange-500" />
+        <div className="flex items-stretch divide-x divide-line">
+          <StatBox label="Answered" value={stats.answered} />
+          <StatBox label="Accuracy" value={`${accuracy}%`} accent />
+          <StatBox label="Sessions" value={stats.sessions} />
+          <StatBox label="Cards due" value={dueCount === null ? '…' : dueCount} />
         </div>
         {stats.answered > 0 && (
           <div className="mt-5">
-            <div className="flex justify-between text-xs text-slate-500 mb-1">
+            <div className="flex justify-between text-xs text-muted mb-1">
               <span>Overall accuracy</span>
               <span>
                 {stats.correct}/{stats.answered}
@@ -77,17 +81,20 @@ export default function Dashboard({ stats, onSelect, onReset }) {
       {weakSpots.length > 0 && (
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-800 text-lg">Focus areas</h2>
-            <Pill className="bg-rose-50 text-rose-600">🎯 auto-practised more often</Pill>
+            <h2 className="font-serif font-bold text-ink text-h2">Focus areas</h2>
+            <Pill className="bg-warning/10 text-warning-strong">
+              <TargetIcon size={14} strokeWidth={2} />
+              auto-practised more often
+            </Pill>
           </div>
           <div className="grid sm:grid-cols-3 gap-3">
             {weakSpots.map((w) => (
-              <div key={w.cat} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                <div className="font-semibold text-slate-800 text-sm">{w.label}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{w.hint}</div>
+              <div key={w.cat} className="rounded-xl border border-line bg-surface-2 p-4">
+                <div className="font-semibold text-ink text-sm">{w.label}</div>
+                <div className="text-xs text-muted mt-0.5">{w.hint}</div>
                 <div className="mt-3">
                   <ProgressBar value={w.total - w.wrong} total={w.total} />
-                  <div className="mt-1 flex justify-between text-xs text-slate-500">
+                  <div className="mt-1 flex justify-between text-xs text-muted">
                     <span>{w.accuracy}% right</span>
                     <span>
                       {w.wrong} {w.wrong === 1 ? 'mistake' : 'mistakes'}
@@ -100,27 +107,31 @@ export default function Dashboard({ stats, onSelect, onReset }) {
         </Card>
       )}
 
-      {/* Mixed practice highlight */}
+      {/* Mixed practice highlight — the primary CTA, accent-filled. */}
       <button
         onClick={() => onSelect('mixed', 'Mixed Practice')}
-        className="w-full text-left rounded-2xl p-6 bg-gradient-to-r from-brand-600 to-indigo-500 text-white shadow-soft hover:shadow-lg transition-shadow active:scale-[.99]"
+        className="w-full text-left rounded-2xl p-6 bg-accent-strong text-on-accent shadow-soft hover:bg-accent-hover transition-colors active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 font-bold text-lg">🎲 Mixed Practice Mode</div>
-            <p className="text-brand-100 text-sm mt-1">
+            <div className="flex items-center gap-2 font-serif font-bold text-h2">
+              <ShuffleIcon size={20} strokeWidth={2} />
+              Mixed Practice Mode
+            </div>
+            <p className="text-on-accent/80 text-sm mt-1">
               A random mix of all exercise types — the best test of active recall.
             </p>
           </div>
-          <span className="text-2xl">→</span>
+          <ArrowRightIcon size={24} />
         </div>
       </button>
 
       {/* Exercise types */}
       <div>
-        <h2 className="font-bold text-slate-800 text-lg mb-3">Choose an exercise</h2>
+        <h2 className="font-serif font-bold text-ink text-h2 mb-3">Choose an exercise</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CATEGORIES.map((cat) => {
+            const CatIcon = CATEGORY_ICONS[cat.key];
             const agg = cat.skills.reduce(
               (acc, sk) => {
                 const s = stats.bySkill[sk];
@@ -137,20 +148,25 @@ export default function Dashboard({ stats, onSelect, onReset }) {
               <button
                 key={cat.key}
                 onClick={() => onSelect(cat.key, cat.title)}
-                className="text-left rounded-2xl bg-white border border-slate-100 shadow-soft p-5 hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                className="text-left rounded-2xl bg-surface border border-line shadow-soft p-5 hover:-translate-y-0.5 hover:border-accent/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
               >
-                <div className="text-3xl">{cat.emoji}</div>
-                <h3 className="mt-3 font-bold text-slate-800">{cat.title}</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-snug">{cat.blurb}</p>
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent-strong">
+                  {CatIcon && <CatIcon size={22} />}
+                </span>
+                <h3 className="mt-3 font-semibold text-ink">{cat.title}</h3>
+                <p className="text-sm text-muted mt-1 leading-snug">{cat.blurb}</p>
                 <div className="mt-4 flex items-center justify-between">
                   {acc !== null ? (
-                    <Pill className="bg-emerald-50 text-emerald-600">
+                    <Pill className="bg-accent/10 text-accent-strong">
                       {acc}% · {agg.a} done
                     </Pill>
                   ) : (
-                    <Pill className="bg-slate-100 text-slate-400">Not started</Pill>
+                    <Pill className="bg-ink/5 text-muted">Not started</Pill>
                   )}
-                  <span className="text-brand-500 font-semibold text-sm">Start →</span>
+                  <span className="flex items-center gap-1 text-accent-strong font-semibold text-sm">
+                    Start
+                    <ArrowRightIcon size={15} />
+                  </span>
                 </div>
               </button>
             );
@@ -162,8 +178,11 @@ export default function Dashboard({ stats, onSelect, onReset }) {
       <Card className="p-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="font-semibold text-slate-700 text-sm">✨ AI tutor feedback</div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <div className="flex items-center gap-1.5 font-semibold text-ink text-sm">
+              <SparkleIcon size={15} className="text-accent-strong" />
+              AI tutor feedback
+            </div>
+            <p className="text-xs text-muted mt-0.5">
               {aiOn
                 ? `On · up to ${aiRequestsRemaining()}/${AI_DAILY_CAP} live requests left today · needs a server API key to work`
                 : 'Off (default) · live feedback on conversation practice & wrong answers · never costs anything while off'}
@@ -174,17 +193,22 @@ export default function Dashboard({ stats, onSelect, onReset }) {
             role="switch"
             aria-checked={aiOn}
             aria-label="Toggle AI tutor feedback"
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${aiOn ? 'bg-brand-500' : 'bg-slate-200'}`}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+              aiOn ? 'bg-accent-strong' : 'bg-ink/15'
+            }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${aiOn ? 'left-[22px]' : 'left-0.5'}`}
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all ${aiOn ? 'left-[22px]' : 'left-0.5'}`}
             />
           </button>
         </div>
       </Card>
 
       <div className="text-center pt-2">
-        <button onClick={onReset} className="text-xs text-slate-400 hover:text-rose-500 transition-colors">
+        <button
+          onClick={onReset}
+          className="text-xs text-muted hover:text-warning-strong transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
           Reset all progress
         </button>
       </div>
