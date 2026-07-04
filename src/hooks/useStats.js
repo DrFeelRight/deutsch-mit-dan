@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { nextSrs, todayStr, dayDiff } from '../lib/helpers.js';
+import { todayStr, dayDiff } from '../lib/helpers.js';
+import { fsrsNext } from '../lib/fsrs.js';
 import { loadStats, saveStats } from '../lib/storage.js';
 
 export const DEFAULT_STATS = {
@@ -9,7 +10,8 @@ export const DEFAULT_STATS = {
   streak: 0,
   lastActive: null,
   bySkill: {}, // skill -> { answered, correct }
-  srs: {}, // cardId -> { box, due }
+  srs: {}, // cardId -> FSRS entry { s, d, due, last, reps, lapses }
+  errorCats: {}, // category -> { wrong, total }
 };
 
 // Persistent progress: overall + per-skill accuracy, streak and spaced-repetition
@@ -24,10 +26,12 @@ export function useStats() {
 
   // All updaters are useCallback([]) — they only touch setStats (stable), so
   // consumers can hold them in deps/memo without churn.
-  const recordAnswer = useCallback((skill, correct) => {
+  // errorCat (optional) is the grammar category the item exercises; attempts
+  // are tallied per category so weak areas can be surfaced and practised.
+  const recordAnswer = useCallback((skill, correct, errorCat) => {
     setStats((s) => {
       const prev = s.bySkill[skill] || { answered: 0, correct: 0 };
-      return {
+      const next = {
         ...s,
         answered: s.answered + 1,
         correct: s.correct + (correct ? 1 : 0),
@@ -36,11 +40,19 @@ export function useStats() {
           [skill]: { answered: prev.answered + 1, correct: prev.correct + (correct ? 1 : 0) },
         },
       };
+      if (errorCat) {
+        const cat = s.errorCats[errorCat] || { wrong: 0, total: 0 };
+        next.errorCats = {
+          ...s.errorCats,
+          [errorCat]: { wrong: cat.wrong + (correct ? 0 : 1), total: cat.total + 1 },
+        };
+      }
+      return next;
     });
   }, []);
 
   const rateCard = useCallback((cardId, rating) => {
-    setStats((s) => ({ ...s, srs: { ...s.srs, [cardId]: nextSrs(s.srs[cardId], rating) } }));
+    setStats((s) => ({ ...s, srs: { ...s.srs, [cardId]: fsrsNext(s.srs[cardId], rating) } }));
   }, []);
 
   const finishSession = useCallback(() => {

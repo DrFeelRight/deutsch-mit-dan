@@ -48,6 +48,7 @@ export default function App() {
               categoryKey={view.key}
               title={view.title}
               srs={stats.srs}
+              errorCats={stats.errorCats}
               onRecord={recordAnswer}
               onRate={rateCard}
               onDone={finishSession}

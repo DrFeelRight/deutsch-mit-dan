@@ -9,13 +9,16 @@ import TextChallenge from '../components/exercises/TextChallenge.jsx';
 import MultipleChoice from '../components/exercises/MultipleChoice.jsx';
 import Conversation from '../components/exercises/Conversation.jsx';
 import { buildQueue } from '../lib/queue.js';
+import { weakCategories } from '../lib/errors.js';
 import { SKILL_LABEL } from '../data/categories.js';
 
 // Presents one task at a time from a queue, records each result, and shows a
 // summary screen at the end.
-export default function ExerciseSession({ categoryKey, title, srs, onRecord, onRate, onExit, onDone }) {
-  // Snapshot SRS at mount so mid-session ratings don't rebuild the queue.
+export default function ExerciseSession({ categoryKey, title, srs, errorCats, onRecord, onRate, onExit, onDone }) {
+  // Snapshot SRS + error stats at mount so mid-session updates don't rebuild
+  // the queue.
   const srsSnapshot = useRef(srs).current;
+  const errorCatsSnapshot = useRef(errorCats).current;
   // Queue resolves asynchronously: the content chunk for this category is
   // fetched on demand (see lib/queue.js).
   const [queue, setQueue] = useState(null);
@@ -25,13 +28,14 @@ export default function ExerciseSession({ categoryKey, title, srs, onRecord, onR
 
   useEffect(() => {
     let active = true;
-    buildQueue(categoryKey, srsSnapshot).then((q) => {
+    const weak = weakCategories(errorCatsSnapshot).map((w) => w.cat);
+    buildQueue(categoryKey, srsSnapshot, weak).then((q) => {
       if (active) setQueue(q);
     });
     return () => {
       active = false;
     };
-  }, [categoryKey, srsSnapshot]);
+  }, [categoryKey, srsSnapshot, errorCatsSnapshot]);
 
   if (queue === null) {
     return (
@@ -44,7 +48,7 @@ export default function ExerciseSession({ categoryKey, title, srs, onRecord, onR
   const item = queue[index];
 
   const handleResult = (correct) => {
-    onRecord(item.kind, correct);
+    onRecord(item.kind, correct, item.errorCat);
     if (correct) setCorrectCount((c) => c + 1);
     if (index + 1 >= queue.length) {
       onDone();

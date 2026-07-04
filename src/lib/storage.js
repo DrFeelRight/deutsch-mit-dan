@@ -9,11 +9,13 @@
 //  - Unknown/missing fields are healed from defaults; wrong-typed fields are
 //    coerced back to their default.
 
+import { migrateLeitnerEntry } from './fsrs.js';
+
 const STORAGE_KEY = 'deutsch-trainer-v1'; // historical name — kept so existing data is found
 const BACKUP_PREFIX = `${STORAGE_KEY}.bak`;
 const QUARANTINE_PREFIX = `${STORAGE_KEY}.corrupt`;
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 // migrations[n] upgrades a payload from schema n to n+1. Each runs inside
 // try/catch in loadStats; a failing migration falls back to the pre-migration
@@ -21,6 +23,15 @@ export const SCHEMA_VERSION = 1;
 const MIGRATIONS = {
   // v0: the launch shape had no schemaVersion field at all.
   0: (data) => ({ ...data, schemaVersion: 1 }),
+  // v1 -> v2: Leitner SRS entries ({box, due}) become FSRS entries
+  // ({s, d, due, last, reps, lapses}); error-category counters added.
+  1: (data) => {
+    const srs = {};
+    for (const [id, entry] of Object.entries(data.srs || {})) {
+      srs[id] = migrateLeitnerEntry(entry);
+    }
+    return { ...data, srs, errorCats: data.errorCats || {}, schemaVersion: 2 };
+  },
 };
 
 const detectVersion = (data) =>

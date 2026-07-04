@@ -46,16 +46,15 @@ export const shuffle = (arr) => {
   return a;
 };
 
-// -----------------------------------------------------------------------------
-// Spaced repetition (Leitner boxes). Box 0 = new / relearning.
-// -----------------------------------------------------------------------------
+// Weighted sampling without replacement (Efraimidis–Spirakis): each item's
+// chance of an early position scales with weightFn(item). Used to bias mixed
+// practice toward weak categories without ever excluding anything.
+export const weightedSample = (arr, weightFn, count) =>
+  [...arr]
+    .map((item) => ({ item, key: Math.pow(Math.random(), 1 / Math.max(weightFn(item), 0.0001)) }))
+    .sort((a, b) => b.key - a.key)
+    .slice(0, count)
+    .map((x) => x.item);
 
-export const SRS_INTERVALS = [0, 1, 2, 4, 7, 14]; // days until next review, by box
-
-export const nextSrs = (entry, rating) => {
-  let box = entry ? entry.box : 0;
-  if (rating === 'again') box = 0;
-  else if (rating === 'good') box = Math.min(box + 1, 5);
-  else if (rating === 'easy') box = Math.min(box + 2, 5);
-  return { box, due: addDays(todayStr(), SRS_INTERVALS[box]) };
-};
+// Spaced repetition now lives in lib/fsrs.js (FSRS-4.5). The legacy Leitner
+// scheduler was removed in the same change; lib/storage.js migrates old data.

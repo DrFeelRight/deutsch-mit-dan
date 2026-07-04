@@ -4,6 +4,7 @@ import Pill from '../components/ui/Pill.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
 import { CATEGORIES } from '../data/categories.js';
 import { dayDiff, todayStr } from '../lib/helpers.js';
+import { weakCategories } from '../lib/errors.js';
 
 function StatBox({ label, value, accent }) {
   return (
@@ -16,6 +17,7 @@ function StatBox({ label, value, accent }) {
 
 export default function Dashboard({ stats, onSelect, onReset }) {
   const accuracy = stats.answered ? Math.round((stats.correct / stats.answered) * 100) : 0;
+  const weakSpots = weakCategories(stats.errorCats);
 
   // The flashcard bank is a lazy chunk (see lib/queue.js), so the due count
   // is computed after mount instead of shipping the data in the main bundle.
@@ -62,6 +64,34 @@ export default function Dashboard({ stats, onSelect, onReset }) {
           </div>
         )}
       </Card>
+
+      {/* Focus areas: the learner's weakest grammar categories. Sessions are
+          automatically biased toward these (see lib/queue.js). */}
+      {weakSpots.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-800 text-lg">Focus areas</h2>
+            <Pill className="bg-rose-50 text-rose-600">🎯 auto-practised more often</Pill>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {weakSpots.map((w) => (
+              <div key={w.cat} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <div className="font-semibold text-slate-800 text-sm">{w.label}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{w.hint}</div>
+                <div className="mt-3">
+                  <ProgressBar value={w.total - w.wrong} total={w.total} />
+                  <div className="mt-1 flex justify-between text-xs text-slate-500">
+                    <span>{w.accuracy}% right</span>
+                    <span>
+                      {w.wrong} {w.wrong === 1 ? 'mistake' : 'mistakes'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Mixed practice highlight */}
       <button
