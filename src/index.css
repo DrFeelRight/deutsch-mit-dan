@@ -2,9 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Design tokens. One name per concept; the value flips between light and dark.
+   Stored as "R G B" channel triples so Tailwind's `<alpha-value>` opacity
+   modifiers (e.g. bg-accent/10) keep working.
+
+   Hex adjustments vs. the brief (for WCAG AA — see README/commit): the brief's
+   accent #0f8a7e is kept as the decorative accent, but small accent *text* and
+   button fills use the darker #0c7268 (accent-strong) so white/dark labels and
+   link text clear 4.5:1. Amber small text uses #9a5208 (warning-strong).
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --color-bg: 250 248 243; /* #faf8f3 warm off-white */
+  --color-surface: 255 255 255; /* #ffffff */
+  --color-surface-2: 244 241 234; /* #f4f1ea subtle raised (inputs) */
+  --color-ink: 26 26 26; /* #1a1a1a */
+  --color-muted: 92 92 92; /* #5c5c5c */
+  --color-line: 230 226 216; /* #e6e2d8 */
+  --color-accent: 15 138 126; /* #0f8a7e */
+  --color-accent-strong: 12 114 104; /* #0c7268 AA-safe teal */
+  --color-accent-hover: 10 95 87; /* #0a5f57 */
+  --color-on-accent: 255 255 255; /* white text on teal fill */
+  --color-warning: 194 102 10; /* #c2660a amber */
+  --color-warning-strong: 154 82 8; /* #9a5208 AA-safe amber text */
+  --shadow-color: 30 41 59;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: 14 15 15; /* #0e0f0f near-black */
+  --color-surface: 26 28 27; /* #1a1c1b */
+  --color-surface-2: 33 36 35; /* #212423 */
+  --color-ink: 242 242 240; /* #f2f2f0 */
+  --color-muted: 160 162 159; /* #a0a29f */
+  --color-line: 42 45 43; /* #2a2d2b */
+  --color-accent: 31 184 166; /* #1fb8a6 brighter teal */
+  --color-accent-strong: 31 184 166; /* already high-contrast on dark */
+  --color-accent-hover: 63 204 187; /* #3fccbb */
+  --color-on-accent: 14 15 15; /* near-black text on bright teal fill */
+  --color-warning: 224 138 46; /* #e08a2e brightened amber */
+  --color-warning-strong: 224 138 46;
+  --shadow-color: 0 0 0;
+}
+
 html,
 body {
-  background: #f6f7fb;
+  background: rgb(var(--color-bg));
+  color: rgb(var(--color-ink));
+}
+
+/* Theme-change easing (kept off transform-heavy props to avoid jank). */
+body {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Flashcard 3D flip */

@@ -11,7 +11,7 @@ const ExerciseSession = lazy(() => import('./pages/ExerciseSession.jsx'));
 
 const SessionFallback = () => (
   <Card className="p-8 text-center">
-    <div className="animate-pulse text-slate-400 text-sm">Loading exercises…</div>
+    <div className="animate-pulse text-muted text-sm">Loading exercises…</div>
   </Card>
 );
 
@@ -35,7 +35,7 @@ export default function App() {
   }, [reset]);
 
   return (
-    <div className="min-h-screen font-sans text-slate-900">
+    <div className="min-h-screen bg-bg font-sans text-ink">
       <Header streak={stats.streak} onHome={goHome} />
 
       <main className="max-w-3xl mx-auto px-4 py-6 sm:py-8">
@@ -58,7 +58,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="max-w-3xl mx-auto px-4 pb-8 text-center text-xs text-slate-400">
+      <footer className="max-w-3xl mx-auto px-4 pb-8 text-center text-xs text-muted">
         Progress is saved locally in your browser · Built for active recall & gradual difficulty
       </footer>
     </div>
