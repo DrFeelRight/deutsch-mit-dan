@@ -46,6 +46,14 @@ export default function TextChallenge({ item, onResult, header, promptNode, sub,
           correctAnswer={item.accept[0]}
           explanation={item.explanation}
           onNext={() => onResult(correct)}
+          aiContext={{
+            type: 'correction',
+            payload: {
+              question: item.prompt || item.wrong || item.source || '',
+              expected: item.accept[0],
+              answer: val,
+            },
+          }}
         />
       )}
     </div>

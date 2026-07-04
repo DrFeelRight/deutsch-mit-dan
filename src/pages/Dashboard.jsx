@@ -5,6 +5,7 @@ import ProgressBar from '../components/ui/ProgressBar.jsx';
 import { CATEGORIES } from '../data/categories.js';
 import { dayDiff, todayStr } from '../lib/helpers.js';
 import { weakCategories } from '../lib/errors.js';
+import { isAiEnabled, setAiEnabled, aiRequestsRemaining, AI_DAILY_CAP } from '../lib/ai.js';
 
 function StatBox({ label, value, accent }) {
   return (
@@ -18,6 +19,12 @@ function StatBox({ label, value, accent }) {
 export default function Dashboard({ stats, onSelect, onReset }) {
   const accuracy = stats.answered ? Math.round((stats.correct / stats.answered) * 100) : 0;
   const weakSpots = weakCategories(stats.errorCats);
+  const [aiOn, setAiOn] = useState(isAiEnabled());
+
+  const toggleAi = () => {
+    setAiEnabled(!aiOn);
+    setAiOn(!aiOn);
+  };
 
   // The flashcard bank is a lazy chunk (see lib/queue.js), so the due count
   // is computed after mount instead of shipping the data in the main bundle.
@@ -150,6 +157,30 @@ export default function Dashboard({ stats, onSelect, onReset }) {
           })}
         </div>
       </div>
+
+      {/* Settings row */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="font-semibold text-slate-700 text-sm">✨ AI tutor feedback</div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {aiOn
+                ? `On · up to ${aiRequestsRemaining()}/${AI_DAILY_CAP} live requests left today · needs a server API key to work`
+                : 'Off (default) · live feedback on conversation practice & wrong answers · never costs anything while off'}
+            </p>
+          </div>
+          <button
+            onClick={toggleAi}
+            role="switch"
+            aria-checked={aiOn}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${aiOn ? 'bg-brand-500' : 'bg-slate-200'}`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${aiOn ? 'left-[22px]' : 'left-0.5'}`}
+            />
+          </button>
+        </div>
+      </Card>
 
       <div className="text-center pt-2">
         <button onClick={onReset} className="text-xs text-slate-400 hover:text-rose-500 transition-colors">

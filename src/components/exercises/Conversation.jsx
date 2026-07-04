@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from '../ui/Button.jsx';
+import AiFeedback from '../AiFeedback.jsx';
 
 // Open-ended speaking/writing prompt with an optional "suggested answer" and
 // honest self-assessment (which feeds the accuracy stat).
@@ -37,6 +38,10 @@ export default function Conversation({ item, onResult, header }) {
           </p>
           <p className="text-slate-700">{item.suggestion}</p>
         </div>
+      )}
+
+      {val.trim().length > 0 && (
+        <AiFeedback type="conversation" payload={{ prompt: item.prompt, answer: val }} label="✨ Get AI feedback on my answer" />
       )}
 
       <div className="mt-5">

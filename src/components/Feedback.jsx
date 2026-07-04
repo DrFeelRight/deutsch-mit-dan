@@ -1,8 +1,11 @@
 import Button from './ui/Button.jsx';
+import AiFeedback from './AiFeedback.jsx';
 
 // Shared feedback panel shown immediately after every graded answer:
 // correct/incorrect banner, the correct answer, and a simple explanation.
-export default function Feedback({ correct, correctAnswer, explanation, onNext, nextLabel = 'Next' }) {
+// aiContext (optional): {type, payload} — offers on-demand AI tutoring on
+// wrong answers when the AI feature flag is enabled.
+export default function Feedback({ correct, correctAnswer, explanation, onNext, nextLabel = 'Next', aiContext }) {
   return (
     <div
       className={`mt-5 rounded-xl p-4 pop border ${
@@ -28,6 +31,8 @@ export default function Feedback({ correct, correctAnswer, explanation, onNext, 
           {explanation}
         </p>
       )}
+
+      {!correct && aiContext && <AiFeedback type={aiContext.type} payload={aiContext.payload} label="✨ Explain my mistake" />}
 
       <div className="mt-4 flex justify-end">
         <Button onClick={onNext}>{nextLabel} →</Button>
