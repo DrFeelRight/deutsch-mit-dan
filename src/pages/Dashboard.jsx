@@ -173,6 +173,7 @@ export default function Dashboard({ stats, onSelect, onReset }) {
             onClick={toggleAi}
             role="switch"
             aria-checked={aiOn}
+            aria-label="Toggle AI tutor feedback"
             className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${aiOn ? 'bg-brand-500' : 'bg-slate-200'}`}
           >
             <span
