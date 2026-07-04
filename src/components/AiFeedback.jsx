@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from './ui/Button.jsx';
+import { SparkleIcon } from './ui/Icon.jsx';
 import { getAiFeedback, isAiEnabled } from '../lib/ai.js';
 
 const ERROR_MESSAGES = {
@@ -10,7 +11,7 @@ const ERROR_MESSAGES = {
 
 // On-demand AI feedback. Renders nothing unless the feature flag is on, and
 // always degrades to the static explanations when the request can't be served.
-export default function AiFeedback({ type, payload, label = '✨ Ask the AI tutor' }) {
+export default function AiFeedback({ type, payload, label = 'Ask the AI tutor' }) {
   const [state, setState] = useState({ status: 'idle' });
 
   if (!isAiEnabled()) return null;
@@ -25,25 +26,28 @@ export default function AiFeedback({ type, payload, label = '✨ Ask the AI tuto
   if (state.status === 'idle') {
     return (
       <div className="mt-3">
-        <Button variant="outline" onClick={ask}>{label}</Button>
+        <Button variant="secondary" onClick={ask}>
+          {label}
+        </Button>
       </div>
     );
   }
 
   if (state.status === 'loading') {
-    return <p className="mt-3 text-sm text-slate-400 animate-pulse">Asking the tutor…</p>;
+    return <p className="mt-3 text-sm text-muted animate-pulse">Asking the tutor…</p>;
   }
 
   if (state.status === 'error') {
-    return <p className="mt-3 text-sm text-slate-400">{ERROR_MESSAGES[state.error] || ERROR_MESSAGES.unavailable}</p>;
+    return <p className="mt-3 text-sm text-muted">{ERROR_MESSAGES[state.error] || ERROR_MESSAGES.unavailable}</p>;
   }
 
   return (
-    <div className="mt-3 rounded-xl bg-indigo-50 border border-indigo-100 p-4 pop">
-      <p className="text-xs uppercase tracking-wide text-indigo-500 font-semibold mb-1">
-        ✨ AI tutor{state.cached ? ' · from cache' : ''}
+    <div className="mt-3 rounded-xl bg-accent/10 border border-accent/20 p-4 pop">
+      <p className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-accent-strong font-semibold mb-1">
+        <SparkleIcon size={14} />
+        AI tutor{state.cached ? ' · from cache' : ''}
       </p>
-      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{state.text}</p>
+      <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">{state.text}</p>
     </div>
   );
 }

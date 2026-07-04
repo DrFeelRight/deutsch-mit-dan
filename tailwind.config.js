@@ -37,12 +37,6 @@ export default {
           DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
           strong: 'rgb(var(--color-warning-strong) / <alpha-value>)', // AA-safe for small warning text
         },
-        // Legacy brand palette — retained so not-yet-restyled screens still
-        // build during the staged rollout. Removed once every screen is on tokens.
-        brand: {
-          50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
-          400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
-        },
       },
       boxShadow: {
         soft: '0 10px 30px -12px rgb(var(--shadow-color) / 0.18)',

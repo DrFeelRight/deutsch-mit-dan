@@ -1,6 +1,6 @@
 import Button from './ui/Button.jsx';
 import AiFeedback from './AiFeedback.jsx';
-import { CheckIcon, XIcon, ArrowRightIcon } from './ui/Icon.jsx';
+import { CheckIcon, XIcon, ArrowRightIcon, SparkleIcon } from './ui/Icon.jsx';
 
 // Shared feedback panel — the colourblind-safe status treatment (highest
 // priority for the red/green-colourblind owner). Correct vs. Incorrect is
@@ -47,7 +47,16 @@ export default function Feedback({ correct, correctAnswer, explanation, onNext, 
       )}
 
       {!correct && aiContext && (
-        <AiFeedback type={aiContext.type} payload={aiContext.payload} label="Explain my mistake" />
+        <AiFeedback
+          type={aiContext.type}
+          payload={aiContext.payload}
+          label={
+            <>
+              <SparkleIcon size={15} />
+              Explain my mistake
+            </>
+          }
+        />
       )}
 
       <div className="mt-4 flex justify-end">
