@@ -2,18 +2,61 @@ import { useEffect, useState } from 'react';
 import Card from '../components/ui/Card.jsx';
 import Pill from '../components/ui/Pill.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
-import { CATEGORY_ICONS, FlameIcon, TargetIcon, ShuffleIcon, ArrowRightIcon, SparkleIcon } from '../components/ui/Icon.jsx';
+import { CATEGORY_ICONS, FlameIcon, TargetIcon, ShuffleIcon, ArrowRightIcon, SparkleIcon, CheckIcon } from '../components/ui/Icon.jsx';
 import { CATEGORIES } from '../data/categories.js';
 import { dayDiff, todayStr } from '../lib/helpers.js';
 import { weakCategories } from '../lib/errors.js';
 import { isAiEnabled, setAiEnabled, aiRequestsRemaining, AI_DAILY_CAP } from '../lib/ai.js';
 
-function StatBox({ label, value, accent }) {
+// Quiet inset tile shared by the passive stats. Lighter than the exercise
+// cards (surface-2 fill, no shadow) so the stats stay glanceable context.
+const TILE = 'rounded-xl border px-3 py-4 flex flex-col items-center justify-center text-center';
+
+function StatTile({ label, value }) {
   return (
-    <div className="flex-1 text-center">
-      <div className={`text-h1 font-serif font-bold ${accent ? 'text-accent-strong' : 'text-ink'}`}>{value}</div>
+    <div className={`${TILE} border-line bg-surface-2`}>
+      <div className="text-h1 font-serif font-bold text-ink">{value}</div>
       <div className="text-xs text-muted mt-1">{label}</div>
     </div>
+  );
+}
+
+// "Cards due" — the one actionable stat. When there are due cards it's a real
+// button (accent tint + border + "Review →" cue) that opens the flashcards
+// session (which already surfaces due cards first — no new scheduling). At 0
+// it's a calm, non-interactive "All caught up" tile. Signalled by border +
+// directional cue as well as hue, so it reads without relying on colour.
+function CardsDueTile({ dueCount, onReview }) {
+  if (dueCount === null) {
+    return (
+      <div className={`${TILE} border-line bg-surface-2`}>
+        <div className="text-h1 font-serif font-bold text-muted">…</div>
+        <div className="text-xs text-muted mt-1">Cards due</div>
+      </div>
+    );
+  }
+
+  if (dueCount === 0) {
+    return (
+      <div className={`${TILE} border-line bg-surface-2`}>
+        <CheckIcon size={22} className="text-muted" />
+        <div className="text-xs text-muted mt-1.5">All caught up</div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={onReview}
+      aria-label={`Review ${dueCount} cards due`}
+      className={`${TILE} border-accent/40 bg-accent/10 hover:bg-accent/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface`}
+    >
+      <div className="text-h1 font-serif font-bold text-accent-strong">{dueCount}</div>
+      <div className="mt-1 flex items-center gap-0.5 text-xs font-semibold text-accent-strong">
+        Review
+        <ArrowRightIcon size={13} strokeWidth={2.25} />
+      </div>
+    </button>
   );
 }
 
@@ -50,18 +93,18 @@ export default function Dashboard({ stats, onSelect, onReset }) {
     <div className="space-y-6">
       {/* Progress overview */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-serif font-bold text-ink text-h2">Your progress</h2>
           <Pill className="bg-accent/10 text-accent-strong">
             <FlameIcon size={14} strokeWidth={2} />
             {stats.streak} day streak
           </Pill>
         </div>
-        <div className="flex items-stretch divide-x divide-line">
-          <StatBox label="Answered" value={stats.answered} />
-          <StatBox label="Accuracy" value={`${accuracy}%`} accent />
-          <StatBox label="Sessions" value={stats.sessions} />
-          <StatBox label="Cards due" value={dueCount === null ? '…' : dueCount} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatTile label="Answered" value={stats.answered} />
+          <StatTile label="Accuracy" value={`${accuracy}%`} />
+          <StatTile label="Sessions" value={stats.sessions} />
+          <CardsDueTile dueCount={dueCount} onReview={() => onSelect('flashcards', 'Due cards')} />
         </div>
         {stats.answered > 0 && (
           <div className="mt-5">
@@ -128,7 +171,7 @@ export default function Dashboard({ stats, onSelect, onReset }) {
 
       {/* Exercise types */}
       <div>
-        <h2 className="font-serif font-bold text-ink text-h2 mb-3">Choose an exercise</h2>
+        <h2 className="font-serif font-bold text-ink text-h2 mb-4">Choose an exercise</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CATEGORIES.map((cat) => {
             const CatIcon = CATEGORY_ICONS[cat.key];
@@ -204,7 +247,7 @@ export default function Dashboard({ stats, onSelect, onReset }) {
         </div>
       </Card>
 
-      <div className="text-center pt-2">
+      <div className="text-center">
         <button
           onClick={onReset}
           className="text-xs text-muted hover:text-warning-strong transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
